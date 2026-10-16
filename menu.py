@@ -31,7 +31,7 @@ def main_menu(win, start_game):
 
         # Desenha o nome do jogo
         font = pygame.font.SysFont(FONT_NAME, 80, bold=True)
-        label = font.render('Tetris', 1, (255, 255, 255))
+        label = font.render('TetrisSockets', 1, (255, 255, 255))
         win.blit(label, (width / 2 - label.get_width() / 2, height / 2 - 200))
 
         draw_button(win, button, 'Jogar', button.collidepoint(pygame.mouse.get_pos()))
