@@ -30,3 +30,18 @@ python main.py
 - Seta para baixo: acelerar a queda.
 
 A melhor pontuação fica salva em `scores.txt`. Execute o jogo a partir da pasta do projeto.
+
+## Estrutura do projeto
+
+| Arquivo       | Responsabilidade                                                             |
+| ------------- | ---------------------------------------------------------------------------- |
+| `main.py`   | Ponto de entrada: inicializa o Pygame, cria a janela e abre o menu.          |
+| `menu.py`   | Menu inicial com o botão **Jogar**.                                   |
+| `game.py`   | Loop da partida: tempo de queda, teclado e desenho a cada frame.             |
+| `state.py`  | `GameState`: estado da partida (grid, peças, pontuação) e suas ações. |
+| `board.py`  | Regras do tabuleiro: criar o grid, validar posições, limpar linhas.        |
+| `piece.py`  | Classe `Piece`, sorteio da próxima peça e conversão para posições.    |
+| `shapes.py` | Formatos e cores das sete peças (S, Z, I, O, J, L, T).                      |
+| `render.py` | Funções de desenho: tabuleiro, próxima peça, pontuação e textos.       |
+| `score.py`  | Leitura e gravação da melhor pontuação em `scores.txt`.                |
+| `config.py` | Constantes: tamanho da janela, linhas, colunas e tamanho do bloco.           |
