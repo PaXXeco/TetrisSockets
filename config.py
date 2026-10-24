@@ -5,6 +5,5 @@ columns = 10
 block_size = 30
 play_width = columns * block_size  # 300
 play_height = rows * block_size  # 600
-
 top_left_x = (s_width - play_width) // 2
 top_left_y = s_height - play_height - 25

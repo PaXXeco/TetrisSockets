@@ -1,6 +1,6 @@
 # TetrisSockets
 
-Jogo de Tetris em Python com Pygame, com menu inicial e registro da melhor pontuação.
+O código do jogo foi adaptado da implementação da [Tech With Tim](www.techwithtim.net/tutorials/game-development-with-python/tetris-pygame/).
 
 ## Como executar
 
