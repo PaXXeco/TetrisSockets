@@ -1,8 +1,8 @@
 import pygame
 
-from config import s_width, s_height
-from game import main
-from menu import main_menu
+from tetris.config import s_width, s_height
+from tetris.ui.game import main
+from tetris.ui.menu import main_menu
 
 pygame.font.init()
 

@@ -1,7 +1,14 @@
+from pathlib import Path
+
+
+SCORE_FILE = Path(__file__).resolve().parent.parent / 'data' / 'scores.txt'
+
+
 def update_score(nscore):
     score = max_score()
 
-    with open('scores.txt', 'w') as f:
+    SCORE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with SCORE_FILE.open('w') as f:
         if int(score) > nscore:
             f.write(str(score))
         else:
@@ -9,8 +16,7 @@ def update_score(nscore):
 
 def max_score():
     try:
-        with open('scores.txt', 'r') as f:
+        with SCORE_FILE.open('r') as f:
             return f.readline().strip() or '0'
     except FileNotFoundError:
         return '0'
-

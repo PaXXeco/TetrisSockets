@@ -1,15 +1,22 @@
-from board import create_grid, valid_space, check_lost, clear_rows
-from piece import get_shape, convert_shape_format
+from tetris.core.board import create_grid, valid_space, check_lost, clear_rows
+from tetris.core.piece import Piece, convert_shape_format
+from tetris.core.sequence import PieceSequence
+from tetris.core.shapes import shapes
 
 # Estado de uma partida, sem depender do pygame
 class GameState(object):
-    def __init__(self):
+    def __init__(self, sequence=None):
+        # Compartilhe a sequência entre jogadores, mantendo um iterador por estado.
+        self._piece_types = iter(sequence if sequence is not None else PieceSequence())
         self.score = 0
         self.locked_positions = {}  # (x,y):(255,0,0)
         self.grid = create_grid(self.locked_positions)
-        self.current_piece = get_shape()
-        self.next_piece = get_shape()
+        self.current_piece = self._new_piece()
+        self.next_piece = self._new_piece()
         self.change_piece = False
+
+    def _new_piece(self):
+        return Piece(5, 0, shapes[next(self._piece_types)])
 
     def refresh_grid(self):
         self.grid = create_grid(self.locked_positions)
@@ -46,7 +53,7 @@ class GameState(object):
             for pos in shape_pos:
                 self.locked_positions[pos] = self.current_piece.color
             self.current_piece = self.next_piece
-            self.next_piece = get_shape()
+            self.next_piece = self._new_piece()
             self.change_piece = False
             self.score += clear_rows(self.grid, self.locked_positions) * 10
 

@@ -1,6 +1,4 @@
-import random
-
-from shapes import shapes, shape_colors
+from tetris.core.shapes import shapes, shape_colors
 
 class Piece(object):
     def __init__(self, column, row, shape):
@@ -9,9 +7,6 @@ class Piece(object):
         self.shape = shape
         self.color = shape_colors[shapes.index(shape)]
         self.rotation = 0 # De 0 a 3 posições
-
-def get_shape():
-    return Piece(5, 0, random.choice(shapes))
 
 def convert_shape_format(shape):
     positions = []

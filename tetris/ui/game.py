@@ -1,8 +1,8 @@
 import pygame
 
-from render import draw_window, draw_next_shape, draw_text_middle
-from score import max_score, update_score
-from state import GameState
+from tetris.ui.render import draw_window, draw_next_shape, draw_text_middle
+from tetris.score import max_score, update_score
+from tetris.core.state import GameState
 
 def main(win):
     last_score = max_score()
