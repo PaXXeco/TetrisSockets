@@ -1,6 +1,6 @@
 import pygame
 
-from tetris.ui.render import draw_window, draw_next_shape, draw_text_middle
+from tetris.ui.render import draw_window, draw_next_shapes, draw_text_middle
 from tetris.score import max_score, update_score
 from tetris.core.state import GameState
 
@@ -51,7 +51,7 @@ def main(win):
         state.update()
 
         draw_window(win, state.grid, state.score, last_score)
-        draw_next_shape(state.next_piece, win)
+        draw_next_shapes(state.next_pieces, win)
         pygame.display.update()
 
         if state.lost():

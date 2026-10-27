@@ -29,6 +29,8 @@ python main.py
 - Seta para cima: girar a peça.
 - Seta para baixo: acelerar a queda.
 
+A barra lateral direita mostra as próximas cinco peças, de cima para baixo, na ordem em que entrarão no tabuleiro.
+
 A melhor pontuação fica salva em `data/scores.txt`. O caminho do recorde é resolvido a partir do projeto, independentemente da pasta de onde o jogo é executado.
 
 ## Estrutura do projeto

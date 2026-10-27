@@ -51,6 +51,23 @@ class PieceSequenceTests(unittest.TestCase):
         expected = [advance(fast) for _ in range(20)]
         self.assertEqual([advance(slow) for _ in range(20)], expected)
 
+    def test_preview_queue_matches_pieces_played_and_refills(self):
+        sequence = PieceSequence(seed=42)
+        expected = list(islice(sequence, 30))
+        state = GameState(sequence)
+        for index in range(24):
+            self.assertEqual(state.current_piece.shape, shapes[expected[index]])
+            self.assertEqual([piece.shape for piece in state.next_pieces],
+                             [shapes[kind] for kind in expected[index + 1:index + 6]])
+            self.assertIs(state.next_piece, state.next_pieces[0])
+            next_piece = state.next_piece
+            state.locked_positions.clear()
+            state.refresh_grid()
+            while not state.change_piece:
+                state.fall()
+            state.update()
+            self.assertIs(state.current_piece, next_piece)
+
 
 if __name__ == '__main__':
     unittest.main()

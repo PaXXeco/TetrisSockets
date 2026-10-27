@@ -1,3 +1,5 @@
+from collections import deque
+
 from tetris.core.board import create_grid, valid_space, check_lost, clear_rows
 from tetris.core.piece import Piece, convert_shape_format
 from tetris.core.sequence import PieceSequence
@@ -12,8 +14,12 @@ class GameState(object):
         self.locked_positions = {}  # (x,y):(255,0,0)
         self.grid = create_grid(self.locked_positions)
         self.current_piece = self._new_piece()
-        self.next_piece = self._new_piece()
+        self.next_pieces = deque(self._new_piece() for _ in range(5))
         self.change_piece = False
+
+    @property
+    def next_piece(self):
+        return self.next_pieces[0]
 
     def _new_piece(self):
         return Piece(5, 0, shapes[next(self._piece_types)])
@@ -52,8 +58,8 @@ class GameState(object):
         if self.change_piece:
             for pos in shape_pos:
                 self.locked_positions[pos] = self.current_piece.color
-            self.current_piece = self.next_piece
-            self.next_piece = self._new_piece()
+            self.current_piece = self.next_pieces.popleft()
+            self.next_pieces.append(self._new_piece())
             self.change_piece = False
             self.score += clear_rows(self.grid, self.locked_positions) * 10
 

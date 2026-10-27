@@ -46,21 +46,33 @@ def draw_grid(surface, row, col):
         pygame.draw.line(surface, (128,128,128), (sx + j * block_size, sy), (sx + j * block_size, sy + play_height))
 
 
-def draw_next_shape(shape, surface):
-    rect = side_panel(surface, True, top_left_y, 220)
-    draw_centered_text(surface, 'Próxima peça', pygame.Rect(rect.x, rect.y, rect.width, 35), 24)
+def draw_next_shapes(shapes, surface):
+    rect = side_panel(surface, True, top_left_y, play_height)
+    draw_centered_text(surface, 'Próximas peças', pygame.Rect(rect.x, rect.y, rect.width, 35), 24)
+    if not shapes:
+        return
+    slot_height = (rect.height - 45) // len(shapes)
+    for index, shape in enumerate(shapes):
+        preview = pygame.Rect(rect.x, rect.y + 45 + index * slot_height,
+                              rect.width, slot_height)
+        if index:
+            pygame.draw.line(surface, (45, 45, 55), preview.topleft, preview.topright)
+        draw_piece_preview(shape, surface, preview)
+
+
+def draw_piece_preview(shape, surface, preview):
     cells = [(j, i) for i, line in enumerate(shape.shape[shape.rotation % len(shape.shape)])
              for j, cell in enumerate(line) if cell == '0']
     min_x = min(x for x, y in cells)
     min_y = min(y for x, y in cells)
-    width = (max(x for x, y in cells) - min_x + 1) * block_size
-    height = (max(y for x, y in cells) - min_y + 1) * block_size
-    preview = pygame.Rect(rect.x, rect.y + 45, rect.width, rect.height - 45)
+    cell_size = min(24, preview.width // 4, (preview.height - 16) // 4)
+    width = (max(x for x, y in cells) - min_x + 1) * cell_size
+    height = (max(y for x, y in cells) - min_y + 1) * cell_size
     sx = preview.centerx - width // 2
     sy = preview.centery - height // 2
     for x, y in cells:
-        cell = pygame.Rect(sx + (x - min_x) * block_size,
-                           sy + (y - min_y) * block_size, block_size, block_size)
+        cell = pygame.Rect(sx + (x - min_x) * cell_size,
+                           sy + (y - min_y) * cell_size, cell_size, cell_size)
         pygame.draw.rect(surface, shape.color, cell)
         pygame.draw.rect(surface, (22, 22, 30), cell, 1)
 
@@ -70,7 +82,7 @@ def draw_window(surface, grid, score=0, last_score=0):
     draw_centered_text(surface, 'TetrisSockets',
                        pygame.Rect(20, 30, surface.get_width() - 40, 80), 54)
     draw_stat(surface, 'Recorde', last_score, False, top_left_y)
-    draw_stat(surface, 'Pontuação', score, True, top_left_y + 240)
+    draw_stat(surface, 'Pontuação', score, False, top_left_y + 130)
 
     for i in range(len(grid)):
         for j in range(len(grid[i])):
