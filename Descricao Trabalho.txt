@@ -1,0 +1,21 @@
+Descrição do Trabalho
+O objetivo deste trabalho é desenvolver uma versão funcional e competitiva do clássico jogo Tetris com suporte a dois jogadores via rede. Cada jogador terá sua própria matriz/tabuleiro na tela. A partida ocorre em tempo real, e as ações de um jogador (como pontuar e enviar linhas de penalidade) afetam diretamente o tabuleiro do adversário. A comunicação de rede e o estado da partida devem ser gerenciados de forma robusta para garantir uma competição justa.
+Regras do Jogo
+
+    Geração Sincronizada de Peças: Para garantir a igualdade na competição, ambos os jogadores devem receber exatamente a mesma sequência de blocos (Tetriminos) na mesma ordem.
+    Controles Individuais: Cada jogador controla suas próprias peças usando o teclado (mover para os lados, girar e queda rápida/Hard Drop).
+    Sistema de Ataque (Linhas de "Lixo"): Quando um jogador limpa 2, 3 ou 4 linhas simultaneamente, ele envia linhas de penalidade (linhas cinzas com um buraco aleatório) para a base do tabuleiro do adversário.
+        Double (2 linhas): Envia 1 linha de lixo.
+        Triple (3 linhas): Envia 2 linhas de lixo.
+        Tetris (4 linhas): Envia 4 linhas de lixo.
+    Condição de Derrota (Game Over): O jogador que acumular blocos até o topo da tela e não conseguir posicionar a nova peça que entra perde a partida, declarando o adversário como vencedor.
+
+Requisitos
+
+    Comunicação via Sockets TCP: A troca de mensagens entre as instâncias do jogo deve utilizar o protocolo TCP para garantir que nenhuma linha de ataque ou comando de fim de jogo seja perdido.
+    Arquitetura do Servidor: O servidor deve ser responsável por:
+        Gerar a "semente" aleatória inicial para que a sequência de peças seja idêntica para ambos os clientes.
+        Intermediar o envio de linhas de ataque de um jogador para o outro.
+        Monitorar o status de Game Over para encerrar a partida simultaneamente.
+        
+    Interface Gráfica: Exibição clara dos dois tabuleiros na tela (pode ser na mesma janela do cliente ou em janelas separadas que mostram o seu jogo e a pré-visualização do jogo do oponente), além da pontuação e da próxima peça.
