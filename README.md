@@ -26,6 +26,7 @@ python main.py
 
 - Clique em **Jogar** e depois em **Um jogador** para começar.
 - **Multijogador** abre as opções **Criar partida** e **Entrar na partida**, ainda desativadas enquanto a comunicação em rede não está implementada.
+- **Configurações** permite salvar a porta de rede (padrão: `5000`, intervalo: `1` a `65535`) em `data/settings.json`. Essa será a porta usada tanto para hospedar quanto para conectar quando a rede for implementada. Clique em **Salvar** ou pressione Enter; **Voltar** ou Esc descarta alterações não salvas.
 - Seta esquerda/direita: mover a peça.
 - Seta para cima: girar a peça.
 - Seta para baixo: acelerar a queda.

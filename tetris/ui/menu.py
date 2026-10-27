@@ -1,5 +1,7 @@
 import pygame
 
+from tetris.ui.settings import settings_menu
+
 FONT_NAME = 'comicsans,liberationsans'
 
 button_width = 240
@@ -28,7 +30,8 @@ def main_menu(win, start_game):
     clock = pygame.time.Clock()
     screen = 'home'
     single_player = button.copy()
-    exit_button = button.move(0, button_height + 16)
+    settings_button = button.move(0, button_height + 16)
+    exit_button = button.move(0, 2 * (button_height + 16))
     multiplayer = button.move(0, button_height + 16)
     back = button.move(0, 2 * (button_height + 16) + 30)
 
@@ -56,6 +59,7 @@ def main_menu(win, start_game):
             draw_button(win, back, 'Voltar', back.collidepoint(mouse))
         else:
             draw_button(win, button, 'Jogar', button.collidepoint(mouse))
+            draw_button(win, settings_button, 'Configurações', settings_button.collidepoint(mouse))
             draw_button(win, exit_button, 'Sair', exit_button.collidepoint(mouse))
         pygame.display.update()
 
@@ -68,6 +72,9 @@ def main_menu(win, start_game):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if screen == 'home' and button.collidepoint(event.pos):
                     screen = 'modes'
+                elif screen == 'home' and settings_button.collidepoint(event.pos):
+                    run = settings_menu(win)
+                    break
                 elif screen == 'home' and exit_button.collidepoint(event.pos):
                     run = False
                     break
