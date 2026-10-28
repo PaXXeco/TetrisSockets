@@ -25,11 +25,12 @@ python main.py
 ## Controles
 
 - Clique em **Jogar** e depois em **Um jogador** para começar.
-- **Multijogador** abre as opções **Criar partida** e **Entrar na partida**, ainda desativadas enquanto a comunicação em rede não está implementada.
-- **Configurações** permite salvar a porta de rede (padrão: `5000`, intervalo: `1` a `65535`) em `data/settings.json`. Essa será a porta usada tanto para hospedar quanto para conectar quando a rede for implementada. Clique em **Salvar** ou pressione Enter; **Voltar** ou Esc descarta alterações não salvas.
+- **Multijogador** abre **Criar partida**, que mostra os IPs locais do computador e a porta para compartilhar com o outro jogador, e **Entrar na partida**, com um campo para digitar o IPv4 do host. Use o endereço da rede compartilhada pelos dois computadores.
+- **Configurações** permite salvar a porta de rede (padrão: `10000`, intervalo: `1` a `65535`) em `data/settings.json`. Clique em **Salvar** ou pressione Enter; **Voltar** ou Esc descarta alterações não salvas.
 - Seta esquerda/direita: mover a peça.
 - Seta para cima: girar a peça.
 - Seta para baixo: acelerar a queda.
+- Barra de espaço: Hard Drop (leva a peça até a última posição válida e a trava).
 
 A barra lateral direita mostra as próximas cinco peças, de cima para baixo, na ordem em que entrarão no tabuleiro.
 
@@ -72,7 +73,7 @@ player_two = GameState(sequence)
 
 Cada jogador recebe a mesma ordem, com consumo independente e objetos de peças próprios. A sequência guarda os tipos gerados para permitir que jogadores mais lentos os consultem depois. Uma semente opcional, como `PieceSequence(seed=42)`, permite reproduzir a ordem nos testes.
 
-O compartilhamento atual funciona no mesmo processo, em execução sequencial. A distribuição da sequência por rede será implementada junto com a comunicação e a concorrência.
+O compartilhamento atual funciona no mesmo processo, em execução sequencial.
 
 ## Testes
 

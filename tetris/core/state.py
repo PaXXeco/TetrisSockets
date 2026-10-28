@@ -47,6 +47,15 @@ class GameState(object):
             self.current_piece.y -= 1
             self.change_piece = True
 
+    def hard_drop(self):
+        self.refresh_grid()
+        while True:
+            self.current_piece.y += 1
+            if not valid_space(self.current_piece, self.grid):
+                self.current_piece.y -= 1
+                break
+        self.change_piece = True
+
     # Desenha a peça atual no grid e, se ela travou, troca de peça e limpa as linhas
     def update(self):
         shape_pos = convert_shape_format(self.current_piece)

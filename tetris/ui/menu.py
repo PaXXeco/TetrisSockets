@@ -1,6 +1,7 @@
 import pygame
 
 from tetris.ui.settings import settings_menu
+from tetris.ui.multiplayer import multiplayer_menu
 
 FONT_NAME = 'comicsans,liberationsans'
 
@@ -51,11 +52,8 @@ def main_menu(win, start_game):
             draw_button(win, multiplayer, 'Multijogador', multiplayer.collidepoint(mouse))
             draw_button(win, back, 'Voltar', back.collidepoint(mouse))
         elif screen == 'multiplayer':
-            draw_button(win, single_player, 'Criar partida', False, enabled=False)
-            draw_button(win, multiplayer, 'Entrar na partida', False, enabled=False)
-            font = pygame.font.SysFont(FONT_NAME, 18)
-            label = font.render('Conexão em breve', True, (120, 120, 135))
-            win.blit(label, label.get_rect(midtop=(multiplayer.centerx, multiplayer.bottom + 5)))
+            draw_button(win, single_player, 'Criar partida', single_player.collidepoint(mouse))
+            draw_button(win, multiplayer, 'Entrar na partida', multiplayer.collidepoint(mouse))
             draw_button(win, back, 'Voltar', back.collidepoint(mouse))
         else:
             draw_button(win, button, 'Jogar', button.collidepoint(mouse))
@@ -84,6 +82,12 @@ def main_menu(win, start_game):
                     screen = 'multiplayer'
                 elif screen == 'modes' and single_player.collidepoint(event.pos):
                     start_game(win)
+                    break
+                elif screen == 'multiplayer' and single_player.collidepoint(event.pos):
+                    run = multiplayer_menu(win, hosting=True)
+                    break
+                elif screen == 'multiplayer' and multiplayer.collidepoint(event.pos):
+                    run = multiplayer_menu(win)
                     break
 
     pygame.display.quit()
