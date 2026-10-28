@@ -1,23 +1,20 @@
 import pygame
 
+from tetris.ui import layout
+
 from tetris.settings import load_port, save_port
 from tetris.ui.render import draw_centered_text
 
 
 def settings_menu(win):
     # Import local evita dependência circular com o menu principal.
-    from tetris.ui.menu import draw_button, FONT_NAME
+    from tetris.ui.menu import draw_button
 
-    width, height = win.get_size()
-    field = pygame.Rect(width // 2 - 120, height // 2 - 30, 240, 56)
-    save = field.move(0, 100)
-    back = save.move(0, 72)
     value = str(load_port())
     active = True
     selected = True
     message = ''
     message_color = (240, 240, 245)
-    font = pygame.font.SysFont(FONT_NAME, 28)
     clock = pygame.time.Clock()
 
     def persist():
@@ -35,11 +32,16 @@ def settings_menu(win):
 
     while True:
         clock.tick(60)
+        factor = layout.scale(win)
+        font = layout.font(max(1, round(28 * factor)))
+        field = layout.rect(win, 280, 382, 240, 56)
+        save = layout.rect(win, 280, 482, 240, 56)
+        back = layout.rect(win, 280, 554, 240, 56)
         win.fill((0, 0, 0))
-        draw_centered_text(win, 'Configurações', pygame.Rect(20, 100, width - 40, 80), 48)
-        draw_centered_text(win, 'Porta de rede', field.move(0, -60), 28)
+        draw_centered_text(win, 'Configurações', layout.rect(win, 20, 100, 760, 80), 48)
+        draw_centered_text(win, 'Porta de rede', field.move(0, round(-60 * factor)), 28)
         draw_centered_text(win, 'Usada para criar e entrar em partidas.',
-                           pygame.Rect(20, field.y - 100, width - 40, 30), 22)
+                           layout.rect(win, 20, 282, 760, 30), 22)
         pygame.draw.rect(win, (22, 22, 30), field, border_radius=6)
         pygame.draw.rect(win, (155, 155, 170) if active else (65, 65, 80), field, 1, border_radius=6)
         text = font.render(value, True, (240, 240, 245))
@@ -49,7 +51,7 @@ def settings_menu(win):
         win.blit(text, text_rect)
         if active and not selected and pygame.time.get_ticks() % 1000 < 500:
             pygame.draw.line(win, (240, 240, 245), text_rect.topright, text_rect.bottomright)
-        draw_centered_text(win, message, pygame.Rect(20, field.bottom + 10, width - 40, 30), 20, message_color)
+        draw_centered_text(win, message, layout.rect(win, 20, 448, 760, 30), 20, message_color)
         mouse = pygame.mouse.get_pos()
         draw_button(win, save, 'Salvar', save.collidepoint(mouse))
         draw_button(win, back, 'Voltar', back.collidepoint(mouse))

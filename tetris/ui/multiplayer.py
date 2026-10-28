@@ -2,6 +2,8 @@ import socket
 
 import pygame
 
+from tetris.ui import layout
+
 from tetris.settings import load_port
 from tetris.ui.render import draw_centered_text
 
@@ -16,12 +18,8 @@ def local_addresses():
 
 
 def multiplayer_menu(win, hosting=False):
-    from tetris.ui.menu import draw_button, FONT_NAME
+    from tetris.ui.menu import draw_button
 
-    width, height = win.get_size()
-    field = pygame.Rect(width // 2 - 160, height // 2 - 40, 320, 56)
-    back = pygame.Rect(width // 2 - 120, height - 130, 240, 56)
-    font = pygame.font.SysFont(FONT_NAME, 28)
     clock = pygame.time.Clock()
     port = load_port()
     addresses = local_addresses() if hosting else []
@@ -31,20 +29,24 @@ def multiplayer_menu(win, hosting=False):
 
     while True:
         clock.tick(60)
+        factor = layout.scale(win)
+        font = layout.font(max(1, round(28 * factor)))
+        field = layout.rect(win, 240, 372, 320, 56)
+        back = layout.rect(win, 280, 695, 240, 56)
         win.fill((0, 0, 0))
         draw_centered_text(win, 'Criar partida' if hosting else 'Entrar na partida',
-                           pygame.Rect(20, 100, width - 40, 80), 48)
+                           layout.rect(win, 20, 100, 760, 80), 48)
         if hosting:
             draw_centered_text(win, 'Passe seu IP ao outro jogador na mesma rede:',
-                               pygame.Rect(20, 220, width - 40, 40), 26)
+                               layout.rect(win, 20, 220, 760, 40), 26)
             # Mais de uma interface pode estar ativa (Wi-Fi, cabo ou VPN).
             text = ' / '.join(addresses) if addresses else 'IP local não encontrado'
             draw_centered_text(win, text, field, 32)
             draw_centered_text(win, 'Use o IP da rede compartilhada pelos dois computadores.',
-                               pygame.Rect(20, field.bottom + 10, width - 40, 35), 22)
+                               layout.rect(win, 20, 438, 760, 35), 22)
         else:
             draw_centered_text(win, 'IP do computador que vai hospedar',
-                               field.move(0, -65), 26)
+                               field.move(0, round(-65 * factor)), 26)
             pygame.draw.rect(win, (22, 22, 30), field, border_radius=6)
             pygame.draw.rect(win, (155, 155, 170) if active else (65, 65, 80),
                              field, 1, border_radius=6)
@@ -57,7 +59,7 @@ def multiplayer_menu(win, hosting=False):
                 pygame.draw.line(win, (240, 240, 245), rect.topright, rect.bottomright)
 
         draw_centered_text(win, f'Porta: {port} (definida em Configurações)',
-                           pygame.Rect(20, field.bottom + 65, width - 40, 35), 24)
+                           layout.rect(win, 20, 493, 760, 35), 24)
         draw_button(win, back, 'Voltar', back.collidepoint(pygame.mouse.get_pos()))
         pygame.display.update()
 

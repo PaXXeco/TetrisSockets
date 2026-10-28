@@ -1,5 +1,6 @@
 import pygame
 
+from tetris.ui import layout
 from tetris.ui.settings import settings_menu
 from tetris.ui.multiplayer import multiplayer_menu
 
@@ -18,33 +19,27 @@ def draw_button(surface, rect, text, hover, enabled=True):
     border_color = (155, 155, 170) if hover else (65, 65, 80)
     pygame.draw.rect(surface, border_color, rect, 1, border_radius=6)
 
-    font = pygame.font.SysFont(FONT_NAME, 28)
     text_color = (240, 240, 245) if enabled else (120, 120, 135)
-    label = font.render(text, True, text_color)
-    surface.blit(label, label.get_rect(center=rect.center))
+    layout.text(surface, text, rect, 28, text_color)
 
 
 # start_game é a função que roda o jogo (recebe a janela)
 def main_menu(win, start_game):
-    width, height = win.get_size()
-    button = pygame.Rect((width - button_width) // 2, height // 2, button_width, button_height)
     clock = pygame.time.Clock()
     screen = 'home'
-    single_player = button.copy()
-    settings_button = button.move(0, button_height + 16)
-    exit_button = button.move(0, 2 * (button_height + 16))
-    multiplayer = button.move(0, button_height + 16)
-    back = button.move(0, 2 * (button_height + 16) + 30)
 
     run = True
     while run:
         clock.tick(60)
         win.fill((0, 0, 0))
 
-        # Desenha o nome do jogo
-        font = pygame.font.SysFont(FONT_NAME, 80, bold=True)
-        label = font.render('TetrisSockets', 1, (255, 255, 255))
-        win.blit(label, (width / 2 - label.get_width() / 2, height / 2 - 200))
+        button = layout.rect(win, 280, 412, 240, 56)
+        single_player = button.copy()
+        settings_button = layout.rect(win, 280, 484, 240, 56)
+        exit_button = layout.rect(win, 280, 556, 240, 56)
+        multiplayer = settings_button.copy()
+        back = layout.rect(win, 280, 586, 240, 56)
+        layout.text(win, 'TetrisSockets', layout.rect(win, 20, 180, 760, 100), 80, bold=True)
 
         mouse = pygame.mouse.get_pos()
         if screen == 'modes':

@@ -63,7 +63,7 @@ def main(win):
         pygame.display.update()
 
         if state.lost():
-            draw_text_middle(win, "YOU LOST!", 80, (255,255,255))
+            draw_text_middle(win, "Você perdeu!", 80, (255,255,255))
             pygame.display.update()
             pygame.time.delay(1500)
             run = False
