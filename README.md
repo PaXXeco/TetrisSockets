@@ -73,7 +73,19 @@ player_two = GameState(sequence)
 
 Cada jogador recebe a mesma ordem, com consumo independente e objetos de peças próprios. A sequência guarda os tipos gerados para permitir que jogadores mais lentos os consultem depois. Uma semente opcional, como `PieceSequence(seed=42)`, permite reproduzir a ordem nos testes.
 
-O compartilhamento atual funciona no mesmo processo, em execução sequencial.
+O exemplo acima compartilha a sequência no mesmo processo. Nas partidas em rede, cada cliente cria sua sequência usando a semente enviada pelo servidor.
+
+## Partida em rede
+
+1. Nos dois computadores, use a mesma porta em **Configurações** (padrão: `10000`).
+2. No computador host, abra **Jogar → Multijogador → Criar partida** e clique em **Hospedar**.
+3. No outro computador, abra **Entrar na partida**, digite o IPv4 do host e clique em **Conectar**.
+
+A partida começa quando os dois clientes estão conectados. O host também participa como cliente do servidor, que aceita conexões TCP nas interfaces locais (`0.0.0.0`). Os computadores devem estar na mesma rede e o firewall do host deve permitir a conexão na porta escolhida.
+
+O servidor distribui a mesma semente aos dois jogadores, encaminha as prévias dos tabuleiros e os ataques e comunica o resultado aos dois clientes. Limpar duas, três ou quatro linhas envia, respectivamente, uma, duas ou quatro linhas cinzas com um buraco aleatório ao adversário. Esc sai da partida; uma desconexão encerra a sessão do outro jogador.
+
+As mensagens são JSON separados por quebra de linha. A comunicação roda em threads com filas para manter a interface responsiva. As regras de movimento e pontuação são calculadas pelos clientes.
 
 ## Testes
 

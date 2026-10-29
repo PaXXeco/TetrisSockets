@@ -1,6 +1,6 @@
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 os.environ.setdefault('SDL_VIDEODRIVER', 'dummy')
 
@@ -12,9 +12,30 @@ from tetris.ui.menu import main_menu
 from tetris.ui.multiplayer import multiplayer_menu
 from tetris.ui.settings import settings_menu
 from tetris.ui.render import draw_window, draw_next_shapes
+from tetris.ui.game import main
 
 
 class ResizeTests(unittest.TestCase):
+    def test_network_game_renders_and_sends_board_after_hard_drop(self):
+        pygame.font.init()
+        win = pygame.display.set_mode((800, 825))
+        connection = Mock()
+        connection.poll.return_value = [{'type': 'board', 'score': 10,
+                                         'grid': [[[0, 0, 0] for _ in range(10)] for _ in range(20)]},
+                                        {'type': 'garbage', 'holes': [3]}]
+        clock = Mock()
+        clock.tick.return_value = 100
+        try:
+            with patch('pygame.time.Clock', return_value=clock), patch('pygame.event.get', side_effect=[
+                    [pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE)],
+                    [pygame.event.Event(pygame.QUIT)]]):
+                self.assertFalse(main(win, connection, seed=42))
+            sent = [call.args[0] for call in connection.send.call_args_list]
+            self.assertEqual(sent[0]['type'], 'board')
+            self.assertTrue(any(cell != (0, 0, 0) for row in sent[0]['grid'] for cell in row))
+        finally:
+            pygame.display.quit()
+
     def test_layout_and_screens_follow_window_size(self):
         pygame.font.init()
         state = GameState()

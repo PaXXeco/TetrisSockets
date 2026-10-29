@@ -76,7 +76,7 @@ def main_menu(win, start_game):
                 elif screen == 'modes' and multiplayer.collidepoint(event.pos):
                     screen = 'multiplayer'
                 elif screen == 'modes' and single_player.collidepoint(event.pos):
-                    start_game(win)
+                    run = start_game(win)
                     break
                 elif screen == 'multiplayer' and single_player.collidepoint(event.pos):
                     run = multiplayer_menu(win, hosting=True)
