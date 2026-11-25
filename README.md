@@ -25,12 +25,15 @@ python main.py
 ## Controles
 
 - Clique em **Jogar** e depois em **Um jogador** para começar.
-- **Multijogador** abre **Criar partida**, que mostra os IPs locais do computador e a porta para compartilhar com o outro jogador, e **Entrar na partida**, com um campo para digitar o IPv4 do host. Use o endereço da rede compartilhada pelos dois computadores.
+- **Multijogador** abre **Criar partida**, que cria a sala e mostra os IPs locais do computador e a porta para compartilhar, e **Entrar na partida**, com um campo para digitar o IPv4 do host. Nas duas telas cada jogador informa o nome (até 12 caracteres) que aparece para os outros; o último nome usado fica salvo em `data/settings.json`.
 - **Configurações** permite salvar a porta de rede (padrão: `10000`, intervalo: `1` a `65535`) em `data/settings.json`. Clique em **Salvar** ou pressione Enter; **Voltar** ou Esc descarta alterações não salvas.
 - Seta esquerda/direita: mover a peça.
 - Seta para cima: girar a peça.
 - Seta para baixo: acelerar a queda.
 - Barra de espaço: Hard Drop (leva a peça até a última posição válida e a trava).
+- C ou Shift esquerdo: Hold (guarda a peça atual e traz a guardada; na primeira vez, traz a próxima da fila). Só pode ser usado uma vez por peça: o painel **Guardada**, à esquerda, fica apagado até a peça em jogo travar.
+
+Cada linha limpa vale 10 pontos. O nível sobe a cada 100 pontos e deixa a queda 15% mais rápida, de 0,27 s por linha no nível 1 até o limite de 0,05 s (nível 12). O nível aparece no painel à esquerda.
 
 A barra lateral direita mostra as próximas cinco peças, de cima para baixo, na ordem em que entrarão no tabuleiro.
 
@@ -77,13 +80,18 @@ O exemplo acima compartilha a sequência no mesmo processo. Nas partidas em rede
 
 ## Partida em rede
 
-1. Nos dois computadores, use a mesma porta em **Configurações** (padrão: `10000`).
-2. No computador host, abra **Jogar → Multijogador → Criar partida** e clique em **Hospedar**.
-3. No outro computador, abra **Entrar na partida**, digite o IPv4 do host e clique em **Conectar**.
+1. Em todos os computadores, use a mesma porta em **Configurações** (padrão: `10000`).
+2. No computador host, abra **Jogar → Multijogador → Criar partida**, informe seu nome e clique em **Criar sala**.
+3. Nos outros computadores, abra **Entrar na partida**, informe o nome e o IPv4 do host e clique em **Conectar**.
+4. A sala lista quem já entrou (de 2 a 10 jogadores). Quando todos estiverem na lista, o host clica em **Iniciar partida**.
 
-A partida começa quando os dois clientes estão conectados. O host também participa como cliente do servidor, que aceita conexões TCP nas interfaces locais (`0.0.0.0`). Os computadores devem estar na mesma rede e o firewall do host deve permitir a conexão na porta escolhida.
+Para testar em um só computador, abra o jogo mais de uma vez e conecte os outros em `127.0.0.1`.
 
-O servidor distribui a mesma semente aos dois jogadores, encaminha as prévias dos tabuleiros e os ataques e comunica o resultado aos dois clientes. Limpar duas, três ou quatro linhas envia, respectivamente, uma, duas ou quatro linhas cinzas com um buraco aleatório ao adversário. Esc sai da partida; uma desconexão encerra a sessão do outro jogador.
+O host também participa como cliente do servidor, que aceita conexões TCP nas interfaces locais (`0.0.0.0`). Os computadores devem estar na mesma rede e o firewall do host deve permitir a conexão na porta escolhida. Depois que a partida começa, a sala não aceita novos jogadores. Nomes repetidos recebem um sufixo, como `Ana (2)`.
+
+Durante a partida, a janela ganha uma coluna à direita com o tabuleiro, o nome e a pontuação de cada adversário; a coluna fica mais larga a partir de cinco adversários. O servidor distribui a mesma semente a todos, encaminha as prévias dos tabuleiros e os ataques e comunica o resultado. Limpar duas, três ou quatro linhas envia, respectivamente, uma, duas ou quatro linhas cinzas com um buraco aleatório a um adversário sorteado entre os que ainda estão jogando.
+
+Quem perde é eliminado e assiste ao restante; quem sai ou desconecta também conta como eliminado. A partida termina quando sobra um jogador, e todos veem a classificação: o vencedor em primeiro e os demais do último ao primeiro eliminado, com a pontuação de cada um. Enter ou Esc volta ao menu. Se o host sair, a partida é encerrada para todos.
 
 As mensagens são JSON separados por quebra de linha. A comunicação roda em threads com filas para manter a interface responsiva. As regras de movimento e pontuação são calculadas pelos clientes.
 

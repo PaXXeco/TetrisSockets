@@ -7,9 +7,11 @@ from tetris.network.protocol import Decoder, encode
 
 
 class Client:
-    def __init__(self, ip, port):
+    def __init__(self, ip, port, name='Jogador'):
         self.events = queue.Queue()
         self.outgoing = queue.Queue(maxsize=128)
+        # A primeira mensagem identifica o jogador na sala.
+        self.outgoing.put({'type': 'hello', 'name': name})
         self.stopped = threading.Event()
         self.socket = None
         self.thread = threading.Thread(target=self._run, args=(ip, port), daemon=True)

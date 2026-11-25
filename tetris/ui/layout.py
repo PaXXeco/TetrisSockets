@@ -5,13 +5,17 @@ import pygame
 from tetris.config import s_width, s_height
 
 
+# Largura somada ao canvas durante a partida em rede (coluna dos adversários).
+extra_width = 0
+
+
 def scale(surface):
-    return min(surface.get_width() / s_width, surface.get_height() / s_height)
+    return min(surface.get_width() / (s_width + extra_width), surface.get_height() / s_height)
 
 
 def rect(surface, x, y, width, height):
     factor = scale(surface)
-    offset_x = (surface.get_width() - s_width * factor) / 2
+    offset_x = (surface.get_width() - (s_width + extra_width) * factor) / 2
     offset_y = (surface.get_height() - s_height * factor) / 2
     return pygame.Rect(round(offset_x + x * factor), round(offset_y + y * factor),
                        max(1, round(width * factor)), max(1, round(height * factor)))

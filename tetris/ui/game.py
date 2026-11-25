@@ -1,39 +1,62 @@
 import pygame
 
-from tetris.ui.render import draw_window, draw_next_shapes, draw_text_middle
+from tetris.ui.render import (draw_window, draw_next_shapes, draw_hold, draw_text_middle,
+                              draw_opponents, draw_leaderboard)
 from tetris.score import max_score, update_score
 from tetris.core.state import GameState
 from tetris.core.sequence import PieceSequence
 from tetris.ui import layout
+from tetris.config import s_width, s_height, play_width, top_left_x
 from tetris.network.protocol import valid_board
 
 
-def draw_opponent(win, board, score):
-    layout.text(win, f'Adversário: {score}', layout.rect(win, 20, 455, 210, 35), 24)
-    bounds = layout.rect(win, 65, 500, 120, 240)
-    for y, row in enumerate(board):
-        for x, color in enumerate(row):
-            cell = pygame.Rect(bounds.x + round(x * bounds.width / 10),
-                               bounds.y + round(y * bounds.height / 20),
-                               max(1, round(bounds.width / 10)), max(1, round(bounds.height / 20)))
-            pygame.draw.rect(win, color, cell)
-    pygame.draw.rect(win, (155, 155, 170), bounds, 1)
+# Largura da coluna dos adversários: mais larga quando há muitos tabuleiros.
+def opponents_width(count):
+    return 240 if count <= 4 else 360
 
-def main(win, connection=None, seed=None):
+
+def main(win, connection=None, seed=None, names=None, player=0):
+    if not connection:
+        return play(win)
+    # Na partida em rede o canvas ganha uma coluna para os adversários;
+    # a janela é alargada para o tabuleiro não encolher.
+    size = win.get_size()
+    layout.extra_width = opponents_width(len(names or []) - 1)
+    wanted = round(size[1] * (s_width + layout.extra_width) / s_height)
+    widened = size[0] < wanted
+    if widened:
+        pygame.display.set_mode((wanted, size[1]), pygame.RESIZABLE)
+    try:
+        return play(win, connection, seed, names or [], player)
+    finally:
+        layout.extra_width = 0
+        if widened and pygame.display.get_surface():
+            pygame.display.set_mode(size, pygame.RESIZABLE)
+
+
+def play(win, connection=None, seed=None, names=(), player=0):
     last_score = max_score()
     state = GameState(PieceSequence(seed=seed))
-    opponent_grid = [[(0, 0, 0)] * 10 for _ in range(20)]
-    opponent_score = 0
+    opponents = {index: {'name': name, 'score': 0, 'out': False,
+                         'grid': [[(0, 0, 0)] * 10 for _ in range(20)]}
+                 for index, name in enumerate(names) if index != player}
+    my_name = names[player] if player < len(names) else ''
     network_time = 0
     finished = None
-    result_time = 0
+    ranking = []
     reported_loss = False
+
+    def draw():
+        draw_window(win, state.grid, state.score, last_score, state.level)
+        draw_next_shapes(state.next_pieces, win)
+        draw_hold(win, state.hold_piece, state.can_hold)
+        if connection:
+            layout.text(win, my_name, layout.rect(win, top_left_x, 150, play_width, 35), 26)
+            draw_opponents(win, list(opponents.values()))
 
     run = True
     clock = pygame.time.Clock()
     fall_time = 0
-    fall_speed = 0.27
-    level_time = 0
     space_held = False
 
     while run:
@@ -43,42 +66,35 @@ def main(win, connection=None, seed=None):
         if connection:
             for message in connection.poll():
                 kind = message.get('type')
-                if kind == 'board' and valid_board(message):
-                    opponent_grid, opponent_score = message['grid'], message['score']
+                opponent = opponents.get(message.get('player'))
+                if kind == 'board' and opponent and valid_board(message):
+                    opponent['grid'], opponent['score'] = message['grid'], message['score']
+                elif kind == 'eliminated' and opponent:
+                    opponent['out'] = True
                 elif kind == 'garbage' and not reported_loss and finished is None:
                     state.add_garbage(message['holes'])
                 elif kind == 'result' and finished is None:
                     finished = 'Você venceu!' if message['won'] else 'Você perdeu!'
+                    ranking = [entry for entry in message.get('ranking', []) if isinstance(entry, dict)]
                 elif kind in ('disconnected', 'error') and finished is None:
                     finished = 'Conexão encerrada'
         if finished is not None:
-            result_time += dt
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return False
                 if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
                     return True
-            draw_window(win, state.grid, state.score, last_score)
-            draw_next_shapes(state.next_pieces, win)
-            draw_opponent(win, opponent_grid, opponent_score)
-            draw_text_middle(win, finished, 48, (255, 255, 255))
+            draw()
+            draw_leaderboard(win, finished, ranking, player)
             pygame.display.update()
-            if result_time >= 3000:
-                return True
             continue
         if connection and state.lost() and not reported_loss:
-            connection.send({'type': 'game_over'})
+            connection.send({'type': 'game_over', 'score': state.score})
             reported_loss = True
         fall_time += dt
-        level_time += dt
 
-        # a cada 5 segundos a peça cai um pouco mais rápido
-        if level_time/1000 > 5:
-            level_time = 0
-            if fall_speed > 0.12:
-                fall_speed -= 0.005
-
-        if fall_time/1000 >= fall_speed and not reported_loss:
+        # a velocidade da queda acompanha o nível, que sobe com a pontuação
+        if fall_time/1000 >= state.fall_speed and not reported_loss:
             fall_time = 0
             state.fall()
 
@@ -102,6 +118,8 @@ def main(win, connection=None, seed=None):
                     space_held = True
                     state.hard_drop()
                     fall_time = 0
+                elif event.key in (pygame.K_c, pygame.K_LSHIFT) and state.hold():
+                    fall_time = 0
 
                 if event.key == pygame.K_DOWN:
                     state.move(0, 1)
@@ -115,16 +133,16 @@ def main(win, connection=None, seed=None):
                 network_time = 0
                 connection.send({'type': 'board', 'grid': state.grid, 'score': state.score})
 
-        draw_window(win, state.grid, state.score, last_score)
-        draw_next_shapes(state.next_pieces, win)
-        if connection:
-            draw_opponent(win, opponent_grid, opponent_score)
+        draw()
+        if reported_loss:
+            # Com mais de dois jogadores, o eliminado assiste até sobrar um.
+            draw_text_middle(win, 'Eliminado', 48, (255, 255, 255))
         pygame.display.update()
 
         if state.lost():
             if connection:
                 if not reported_loss:
-                    connection.send({'type': 'game_over'})
+                    connection.send({'type': 'game_over', 'score': state.score})
                     reported_loss = True
                 continue
             draw_text_middle(win, "Você perdeu!", 80, (255,255,255))

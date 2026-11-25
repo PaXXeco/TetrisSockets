@@ -16,12 +16,24 @@ class GameState(object):
         self.grid = create_grid(self.locked_positions)
         self.current_piece = self._new_piece()
         self.next_pieces = deque(self._new_piece() for _ in range(5))
+        self.hold_piece = None
+        self.can_hold = True
         self.change_piece = False
         self.overflow = False
 
     @property
     def next_piece(self):
         return self.next_pieces[0]
+
+    # Sobe um nível a cada 100 pontos (10 linhas limpas).
+    @property
+    def level(self):
+        return self.score // 100 + 1
+
+    # Segundos entre uma queda e outra: 15% mais rápido por nível, até o limite.
+    @property
+    def fall_speed(self):
+        return max(0.05, 0.27 * 0.85 ** (self.level - 1))
 
     def _new_piece(self):
         return Piece(5, 0, shapes[next(self._piece_types)])
@@ -58,6 +70,24 @@ class GameState(object):
                 break
         self.change_piece = True
 
+    # Guarda a peça atual e traz a guardada (ou a próxima da fila).
+    # Só vale uma vez por peça: libera de novo quando a peça em jogo travar.
+    def hold(self):
+        if not self.can_hold or self.change_piece:
+            return False
+        held = self.hold_piece
+        self.hold_piece = Piece(5, 0, self.current_piece.shape)
+        if held is None:
+            self.current_piece = self.next_pieces.popleft()
+            self.next_pieces.append(self._new_piece())
+        else:
+            self.current_piece = held
+        self.can_hold = False
+        self.refresh_grid()
+        if not valid_space(self.current_piece, self.grid):
+            self.overflow = True
+        return True
+
     # Desenha a peça atual no grid e, se ela travou, troca de peça e limpa as linhas
     def update(self):
         cleared = 0
@@ -73,6 +103,7 @@ class GameState(object):
             self.current_piece = self.next_pieces.popleft()
             self.next_pieces.append(self._new_piece())
             self.change_piece = False
+            self.can_hold = True
             cleared = clear_rows(self.grid, self.locked_positions)
             self.score += cleared * 10
             self.refresh_grid()

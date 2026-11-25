@@ -1,6 +1,8 @@
 import json
 
 MAX_MESSAGE = 32768
+MAX_PLAYERS = 10
+MAX_NAME = 12
 
 
 def encode(message):
@@ -38,3 +40,10 @@ def valid_board(message):
                     and all(isinstance(cell, list) and len(cell) == 3
                             and all(type(c) is int and 0 <= c <= 255 for c in cell)
                             for cell in row) for row in grid))
+
+
+def clean_name(value):
+    """Nome sem espaços sobrando e limitado a MAX_NAME; '' se for inválido."""
+    if not isinstance(value, str):
+        return ''
+    return ' '.join(''.join(c for c in value if c.isprintable()).split())[:MAX_NAME].strip()
