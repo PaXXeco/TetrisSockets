@@ -49,15 +49,22 @@ A melhor pontuação fica salva em `data/scores.txt`. O caminho do recorde é re
 | `tetris/core/piece.py` | Peças e conversão para posições. |
 | `tetris/core/sequence.py` | Sequência compartilhada com sacolas de sete peças. |
 | `tetris/core/shapes.py` | Formatos e cores das sete peças. |
-| `tetris/ui/menu.py` | Menu inicial com o botão **Jogar**. |
-| `tetris/ui/game.py` | Loop da partida, teclado e tempo de queda. |
-| `tetris/ui/render.py` | Desenho do tabuleiro e da HUD. |
+| `tetris/network/server.py` | Servidor da sala: jogadores, semente, ataques, eliminações e classificação. |
+| `tetris/network/client.py` | Conexão do jogador com o servidor, em thread própria. |
+| `tetris/network/protocol.py` | Formato das mensagens e limites (jogadores por sala, tamanho do nome). |
+| `tetris/ui/menu.py` | Menu inicial e escolha do modo de jogo. |
+| `tetris/ui/multiplayer.py` | Telas de criar/entrar na partida e a sala de espera. |
+| `tetris/ui/settings.py` | Tela de configuração da porta. |
+| `tetris/ui/game.py` | Loop da partida, teclado, tempo de queda e mensagens da rede. |
+| `tetris/ui/render.py` | Desenho do tabuleiro, da HUD, dos adversários e da classificação. |
+| `tetris/ui/layout.py` | Escala da interface conforme o tamanho da janela. |
 | `tetris/score.py` | Leitura e gravação do recorde. |
+| `tetris/settings.py` | Leitura e gravação da porta e do nome do jogador. |
 | `tetris/config.py` | Dimensões da janela, tabuleiro e blocos. |
-| `data/scores.txt` | Recorde salvo entre partidas. |
-| `tests/` | Testes automatizados. |
+| `data/scores.txt` | Recorde salvo entre partidas (criado pelo jogo). |
+| `data/settings.json` | Porta e nome salvos entre execuções (criado pelo jogo). |
 
-O pacote `tetris/core` contém as regras sem depender do Pygame. O pacote `tetris/ui` contém a interface e usa essas regras para controlar a partida.
+O pacote `tetris/core` contém as regras sem depender do Pygame. O pacote `tetris/network` cuida da comunicação por sockets TCP. O pacote `tetris/ui` contém a interface e usa essas regras para controlar a partida.
 
 ## Sequência de peças
 
@@ -74,7 +81,7 @@ player_one = GameState(sequence)
 player_two = GameState(sequence)
 ```
 
-Cada jogador recebe a mesma ordem, com consumo independente e objetos de peças próprios. A sequência guarda os tipos gerados para permitir que jogadores mais lentos os consultem depois. Uma semente opcional, como `PieceSequence(seed=42)`, permite reproduzir a ordem nos testes.
+Cada jogador recebe a mesma ordem, com consumo independente e objetos de peças próprios. A sequência guarda os tipos gerados para permitir que jogadores mais lentos os consultem depois. Uma semente opcional, como `PieceSequence(seed=42)`, permite reproduzir a ordem.
 
 O exemplo acima compartilha a sequência no mesmo processo. Nas partidas em rede, cada cliente cria sua sequência usando a semente enviada pelo servidor.
 
@@ -94,11 +101,3 @@ Durante a partida, a janela ganha uma coluna à direita com o tabuleiro, o nome 
 Quem perde é eliminado e assiste ao restante; quem sai ou desconecta também conta como eliminado. A partida termina quando sobra um jogador, e todos veem a classificação: o vencedor em primeiro e os demais do último ao primeiro eliminado, com a pontuação de cada um. Enter ou Esc volta ao menu. Se o host sair, a partida é encerrada para todos.
 
 As mensagens são JSON separados por quebra de linha. A comunicação roda em threads com filas para manter a interface responsiva. As regras de movimento e pontuação são calculadas pelos clientes.
-
-## Testes
-
-Na pasta do projeto, com o ambiente virtual ativo:
-
-```bash
-python -m unittest discover -s tests -v
-```

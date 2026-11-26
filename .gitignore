@@ -5,3 +5,9 @@ venv/
 .env
 .env.*
 !.env.example
+
+# Testes automatizados: ficam só na máquina de quem desenvolve
+tests/
+
+# Recorde, porta e nome: o jogo recria ao rodar
+data/
